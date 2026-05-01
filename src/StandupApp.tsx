@@ -1,46 +1,53 @@
-import { useState } from "react";
-import StartScreen from "./StartScreen";
-import StandupScreen from "./StandupScreen";
-import EndScreen from "./EndScreen";
+import { useState } from 'react';
+import StartScreen from './StartScreen';
+import StandupScreen from './StandupScreen';
+import EndScreen from './EndScreen';
 
-export type AppScreen = "start" | "standup" | "end";
+export type AppScreen = 'start' | 'standup' | 'end';
 
 export interface StandupConfig {
   questions: string[];
   timerDuration: number; // seconds
-  orderMethod: "daily-random" | "shuffle" | "alphabetical";
+  orderMethod: 'daily-random' | 'shuffle' | 'alphabetical';
 }
 
-export const TEAM_MEMBERS = ["Abbi", "Andrew", "Todd", "Caitlin", "Sai", "Mitul"];
+export const TEAM_MEMBERS = [
+  'Abbie',
+  'Andrew',
+  'Todd',
+  'Caitlin',
+  'Sai',
+  'Mitul',
+];
 
 const DEFAULT_QUESTIONS = [
-  "What did you do yesterday?",
-  "What are you working on today?",
-  "Any blockers?",
-  "Any shoutouts or announcements?",
+  'What did you do yesterday?',
+  'What are you working on today?',
+  'Any blockers?',
+  'Any shoutouts or announcements?',
 ];
 
 function loadConfig(): StandupConfig {
   try {
-    const saved = localStorage.getItem("standup-config");
+    const saved = localStorage.getItem('standup-config');
     if (saved) {
       const parsed = JSON.parse(saved);
       return {
         questions: parsed.questions ?? DEFAULT_QUESTIONS,
         timerDuration: parsed.timerDuration ?? 60,
-        orderMethod: parsed.orderMethod ?? "daily-random",
+        orderMethod: parsed.orderMethod ?? 'daily-random',
       };
     }
   } catch {}
   return {
     questions: DEFAULT_QUESTIONS,
     timerDuration: 60,
-    orderMethod: "daily-random",
+    orderMethod: 'daily-random',
   };
 }
 
 export function saveConfig(config: StandupConfig) {
-  localStorage.setItem("standup-config", JSON.stringify(config));
+  localStorage.setItem('standup-config', JSON.stringify(config));
 }
 
 // Seeded random number generator (mulberry32)
@@ -61,13 +68,13 @@ function getDateSeed(): number {
 
 export function getOrderedMembers(
   members: string[],
-  method: StandupConfig["orderMethod"]
+  method: StandupConfig['orderMethod'],
 ): string[] {
   const arr = [...members];
-  if (method === "alphabetical") {
+  if (method === 'alphabetical') {
     return arr.sort();
   }
-  if (method === "daily-random") {
+  if (method === 'daily-random') {
     const seed = getDateSeed();
     const rand = mulberry32(seed);
     for (let i = arr.length - 1; i > 0; i--) {
@@ -85,7 +92,7 @@ export function getOrderedMembers(
 }
 
 export default function StandupApp() {
-  const [screen, setScreen] = useState<AppScreen>("start");
+  const [screen, setScreen] = useState<AppScreen>('start');
   const [config, setConfig] = useState<StandupConfig>(loadConfig);
   const [orderedMembers, setOrderedMembers] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -96,14 +103,14 @@ export default function StandupApp() {
     const ordered = getOrderedMembers(TEAM_MEMBERS, cfg.orderMethod);
     setOrderedMembers(ordered);
     setCurrentIndex(0);
-    setScreen("standup");
+    setScreen('standup');
   }
 
   function handleNext() {
     if (currentIndex < orderedMembers.length - 1) {
       setCurrentIndex((i) => i + 1);
     } else {
-      setScreen("end");
+      setScreen('end');
     }
   }
 
@@ -114,16 +121,16 @@ export default function StandupApp() {
   }
 
   function handleRestart() {
-    setScreen("start");
+    setScreen('start');
     setCurrentIndex(0);
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white flex flex-col">
-      {screen === "start" && (
+    <div className='min-h-screen bg-gray-950 text-white flex flex-col'>
+      {screen === 'start' && (
         <StartScreen config={config} onStart={handleStart} />
       )}
-      {screen === "standup" && (
+      {screen === 'standup' && (
         <StandupScreen
           config={config}
           members={orderedMembers}
@@ -132,7 +139,7 @@ export default function StandupApp() {
           onBack={handleBack}
         />
       )}
-      {screen === "end" && <EndScreen onRestart={handleRestart} />}
+      {screen === 'end' && <EndScreen onRestart={handleRestart} />}
     </div>
   );
 }
